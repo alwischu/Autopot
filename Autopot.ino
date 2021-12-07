@@ -24,9 +24,9 @@ bool vlv_state = false;
 
 //button
 const int button = 12;
-int buttState = 0;
-bool buttFlag = false;
-unsigned long buttPress, buttRelease;
+int buttonState = 0;
+bool buttonFlag = false;
+unsigned long buttonPress, buttonRelease;
 
 //iterator to cycle through screens 
 int scrnItr = -1;
@@ -98,18 +98,18 @@ ReadSensor();
 ReadButton();
 DisplayScreen(scrnItr); 
 
-while (buttState == HIGH){
+while (buttonState == HIGH){
     ReadButton();
     delay(50);
-    ButtDlyChk(buttPress);
+    ButtonDelayCheck(buttonPress);
    // DisplayScreen(scrnItr);
-    if(buttState == LOW && !noCycle){
+    if(buttonState == LOW && !noCycle){
       CycleScreen();
     }   
 }
  
   //Checks if action was performed on screen
-  if(noCycle && buttRelease > buttPress)
+  if(noCycle && buttonRelease > buttonPress)
   {noCycle = false;}
  
   looper = (looper+1)%4;
@@ -142,7 +142,7 @@ void ValveOpen(int duration){
   }
 
 //indefinite open
-  while(duration <= 0 && buttState == HIGH){
+  while(duration <= 0 && buttonState == HIGH){
     RGB_color(25,0,0);
     delay(250);
     RGB_color(0,0,0);
@@ -287,7 +287,7 @@ void DisplayScreen(int x){
       lcd.setCursor(0,1);
       lcd.print("HOLD TO CONFIRM");
          ReadButton();
-         ButtDlyChk(millis());
+         ButtonDelayCheck(millis());
       break;
 
     case 5: // wet/dry graph
@@ -391,7 +391,7 @@ void MeasureSoil(void) {
     delay(1000);
   }
   
-  //TODO Screen shit
+  //TODO Screen things
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("  NOW SAMPLING  ");
@@ -472,8 +472,8 @@ void MeasureSoil(void) {
   //Serial.println(x);
   //Serial.print("millis: ");
   //Serial.println(millis());
-  //Serial.print("buttstate: ");
-  //Serial.println(buttState);
+  //Serial.print("buttonState: ");
+  //Serial.println(buttonState);
   unsigned long mils = millis();
 
   ReadButton();
@@ -491,7 +491,7 @@ void MeasureSoil(void) {
   //do while watering did not occur
   while(!waterConfirm){
     ReadButton();  
-    if(buttState == LOW ){
+    if(buttonState == LOW ){
       //Serial.println("Entered low state if");
       if (screenchange){
         lcd.clear();
@@ -512,8 +512,8 @@ void MeasureSoil(void) {
         
         for (int y = 0; y < 10; y++){
           ReadButton();
-          if(buttState == HIGH){
-            while(buttState == HIGH){
+          if(buttonState == HIGH){
+            while(buttonState == HIGH){
               //Serial.println("Watering");
               ValveOpen(0);
               ReadButton();
@@ -547,7 +547,7 @@ lcd.print(g);
 lcd.setCursor(3,1);
 delay(1000);  
 }
-   //TODO Screen shit
+   //TODO Screen thing
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("  NOW SAMPLING  ");
@@ -622,7 +622,7 @@ for (int zz = 0; zz<2 ;zz++){
 }
 //defines actions for screens when 3-sec hold is performed by users on certain screens
 //SCREEN COUNT 10
-void ButtDlyChk(unsigned long time)
+void ButtonDelayCheck(unsigned long time)
 {
     unsigned long tmp = millis();
     switch(scrnItr)
@@ -631,7 +631,7 @@ void ButtDlyChk(unsigned long time)
       if (millis()- time >= 3000){     
         if (vlv_state==true){
           ValveClose();
-    //    buttPress = millis();
+    //    buttonPress = millis();
         }
         else{
           ValveOpen(0);
@@ -642,7 +642,7 @@ void ButtDlyChk(unsigned long time)
       break;
 
       case 2: //Setpoint not set screen
-       if (millis() - time >= 3000 && soilSet == false && buttState == HIGH){
+       if (millis() - time >= 3000 && soilSet == false && buttonState == HIGH){
     //    CycleScreen();
            MeasureSoil();
        }
@@ -652,10 +652,10 @@ void ButtDlyChk(unsigned long time)
       break;
 
       case 4: //calibration reset screen
-      if (buttPress > tempDisplay && millis()-buttPress >= 3000 && buttState == HIGH) {
+      if (buttonPress > tempDisplay && millis()-buttonPress >= 3000 && buttonState == HIGH) {
        MeasureSoil();
       }
-      else if (millis() - tempDisplay > 10000 && buttPress < tempDisplay && buttState == LOW){
+      else if (millis() - tempDisplay > 10000 && buttonPress < tempDisplay && buttonState == LOW){
         scrnItr--;
         DisplayScreen(scrnItr);
       }
@@ -683,19 +683,19 @@ void ButtDlyChk(unsigned long time)
 
 void ReadButton(void){
  // //Serial.println("ReadButton Entered");
-  buttState = digitalRead(button);
+  buttonState = digitalRead(button);
    
- if(buttState == HIGH){
-  if (buttFlag == false){
-    buttPress = millis();
- // //Serial.print(buttPress);
-    buttFlag = true; 
+ if(buttonState == HIGH){
+  if (buttonFlag == false){
+    buttonPress = millis();
+ // //Serial.print(buttonPress);
+    buttonFlag = true; 
     //Serial.println("changed from false to true"); 
     } 
  }
- else if(buttState == LOW && buttFlag == true){
-   buttRelease = millis();
-   buttFlag = false;
+ else if(buttonState == LOW && buttonFlag == true){
+   buttonRelease = millis();
+   buttonFlag = false;
    //Serial.println("changed from true to false");
  } 
 }
